@@ -23,11 +23,9 @@ class MainActivity : AppCompatActivity() {
         circleSectorView.setOnSectorSelectListener(object :
             CircleSectorView.OnSectorSelectListener {
             override fun onSectorSelected(name: String) {
-                Toast.makeText(this@MainActivity, name, Toast.LENGTH_SHORT).show()
             }
 
             override fun onSectorUnselected(name: String) {
-                Toast.makeText(this@MainActivity, "$name U", Toast.LENGTH_SHORT).show()
             }
         })
     }

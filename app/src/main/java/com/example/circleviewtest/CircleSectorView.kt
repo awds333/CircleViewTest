@@ -24,8 +24,16 @@ class CircleSectorView : View {
         color = Color.BLUE
     }
 
-    private val touchListener = OnTouchListener { _, event ->
-        when (event.action) {
+    private var selectedSectorPosition: Int? = null
+    private var sectors: List<Sector> = emptyList()
+    private var listener: OnSectorSelectListener? = null
+
+    private var iconsBitmaps: List<Bitmap> = emptyList()
+
+    private var squareSize = 0
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return when (event?.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                 val newSector = getSector(event.x, event.y)
                 if (selectedSectorPosition != newSector) {
@@ -39,14 +47,14 @@ class CircleSectorView : View {
                 true
             }
             MotionEvent.ACTION_UP -> {
-                selectedSectorPosition?.also {
-                    sectors[it].selected = !sectors[it].selected
-                    sectors[it].focused = false
-                    animate(it)
-                    if (sectors[it].selected)
-                        listener?.onSectorSelected(sectors[it].name)
+                selectedSectorPosition?.let { sectors[it] }?.apply {
+                    selected = !selected
+                    focused = false
+                    animate(this)
+                    if (selected)
+                        listener?.onSectorSelected(name)
                     else
-                        listener?.onSectorUnselected(sectors[it].name)
+                        listener?.onSectorUnselected(name)
                 }
                 selectedSectorPosition = null
                 invalidate()
@@ -56,21 +64,9 @@ class CircleSectorView : View {
         }
     }
 
-    private var selectedSectorPosition: Int? = null
-    private var sectors: List<Sector> = emptyList()
-    private var listener: OnSectorSelectListener? = null
+    constructor(context: Context) : super(context)
 
-    private var iconsBitmaps: List<Bitmap> = emptyList()
-
-    private var squareSize = 0
-
-    constructor(context: Context) : super(context) {
-        setOnTouchListener(touchListener)
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        setOnTouchListener(touchListener)
-    }
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     fun setSectorsNames(sectorsNames: List<String>) {
         cancelAnimation()
@@ -87,17 +83,17 @@ class CircleSectorView : View {
         this.listener = listener
     }
 
-    private fun animate(position: Int) {
-        sectors[position].animator?.cancel()
+    private fun animate(sector: Sector) {
+        sector.animator?.cancel()
         val targetRadius =
-            if (sectors[position].selected) selectedRadius.toFloat() else smallRadrius.toFloat()
+            if (sector.selected) selectedRadius.toFloat() else smallRadrius.toFloat()
         val animationDuration =
-            400 * abs(sectors[position].radius - targetRadius) / (selectedRadius - smallRadrius)
-        sectors[position].animator =
-            ValueAnimator.ofFloat(sectors[position].radius.toFloat(), targetRadius).apply {
+            400 * abs(sector.radius - targetRadius) / (selectedRadius - smallRadrius)
+        sector.animator =
+            ValueAnimator.ofFloat(sector.radius.toFloat(), targetRadius).apply {
                 duration = animationDuration.toLong()
                 addUpdateListener {
-                    sectors[position].radius = (it.animatedValue as Float).toDouble()
+                    sector.radius = (it.animatedValue as Float).toDouble()
                     invalidate()
                 }
                 start()
@@ -148,10 +144,11 @@ class CircleSectorView : View {
                 true,
                 paint
             )
+            val icon = iconsBitmaps[i]
             canvas.drawBitmap(
-                iconsBitmaps[i],
-                (squareSize * 0.45 + squareSize * 0.4 * sector.radius * cos(ang * (-i + 0.7) * Math.PI / 180)).toFloat(),
-                (squareSize * 0.45 - squareSize * 0.4 * sector.radius * sin(ang * (-i + 0.7) * Math.PI / 180)).toFloat(),
+                icon,
+                (squareSize / 2 + squareSize * 0.4 * sector.radius * cos((ang * (-i - 0.5) + 90) * Math.PI / 180) - icon.width / 2).toFloat(),
+                (squareSize / 2 - squareSize * 0.4 * sector.radius * sin((ang * (-i - 0.5) + 90) * Math.PI / 180) - icon.height / 2).toFloat(),
                 paint
             )
         }
