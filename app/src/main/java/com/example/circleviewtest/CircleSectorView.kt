@@ -3,7 +3,10 @@ package com.example.circleviewtest
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -64,9 +67,22 @@ class CircleSectorView : View {
 
     constructor(context: Context) : super(context)
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        val a =
+            context.obtainStyledAttributes(attrs, R.styleable.CircleSectorView)
+        try {
+            val entries =
+                a.getTextArray(R.styleable.CircleSectorView_sectors_names)
+            if (entries != null) {
+                setSectorsItems(entries.toList().map { SectorItem(it.toString()) })
+            }
+        } finally {
+            a.recycle()
+        }
+    }
 
     fun setSectorsItems(sectors: List<SectorItem>) {
+        cancelAnimation()
         sectorsState = sectors.map { SectorState(it, smallRadrius, it.defaultColor) }
     }
 
@@ -197,6 +213,7 @@ class CircleSectorView : View {
         sectorsState.forEach {
             it.animator?.cancel()
             it.radius = if (it.selected) selectedRadius else smallRadrius
+            it.color = if (it.selected) it.sectorItem.selectedColor else it.sectorItem.defaultColor
         }
     }
 }

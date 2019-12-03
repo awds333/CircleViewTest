@@ -10,7 +10,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        circleSectorView.setSectorsItems(
+        /*circleSectorView.setSectorsItems(
             listOf(
                 CircleSectorView.SectorItem("a"),
                 CircleSectorView.SectorItem("a"),
@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
                 CircleSectorView.SectorItem("a"),
                 CircleSectorView.SectorItem("a")
             )
-        )
+        )*/
         circleSectorView.setOnSectorSelectListener(object :
             CircleSectorView.OnSectorSelectListener {
             override fun onSectorSelected(name: String) {

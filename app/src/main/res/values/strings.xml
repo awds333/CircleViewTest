@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">CircleViewTest</string>
+
+    <string-array name="test_sectors_names">
+        <item>a</item>
+        <item>b</item>
+        <item>c</item>
+        <item>d</item>
+        <item>e</item>
+        <item>f</item>
+    </string-array>
 </resources>
