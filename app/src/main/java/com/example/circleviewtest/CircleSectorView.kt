@@ -1,5 +1,7 @@
 package com.example.circleviewtest
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
@@ -19,6 +21,9 @@ class CircleSectorView : View {
 
     private var smallRadrius = 0.7
     private var selectedRadius = 1.0
+
+    private var defaultColor = Color.RED
+    private var selectedColor = Color.BLUE
 
     private val paint = Paint().apply {
         color = Color.BLUE
@@ -70,7 +75,7 @@ class CircleSectorView : View {
 
     fun setSectorsNames(sectorsNames: List<String>) {
         cancelAnimation()
-        sectors = sectorsNames.map { Sector(it, smallRadrius) }
+        sectors = sectorsNames.map { Sector(it, smallRadrius, defaultColor) }
         if (isLaidOut)
             invalidate()
     }
@@ -89,15 +94,26 @@ class CircleSectorView : View {
             if (sector.selected) selectedRadius.toFloat() else smallRadrius.toFloat()
         val animationDuration =
             400 * abs(sector.radius - targetRadius) / (selectedRadius - smallRadrius)
-        sector.animator =
-            ValueAnimator.ofFloat(sector.radius.toFloat(), targetRadius).apply {
-                duration = animationDuration.toLong()
-                addUpdateListener {
-                    sector.radius = (it.animatedValue as Float).toDouble()
-                    invalidate()
+
+        val colorAnimator = ValueAnimator.ofArgb(sector.color, if (sector.selected) selectedColor else defaultColor)
+                .apply {
+                    duration = animationDuration.toLong()
+                    addUpdateListener {
+                        sector.color = it.animatedValue as Int
+                    }
                 }
-                start()
+        val radiusAnimator = ValueAnimator.ofFloat(sector.radius.toFloat(), targetRadius).apply {
+            duration = animationDuration.toLong()
+            addUpdateListener {
+                sector.radius = (it.animatedValue as Float).toDouble()
+                invalidate()
             }
+        }
+        sector.animator = AnimatorSet()
+        sector.animator!!.apply {
+            playTogether(radiusAnimator,colorAnimator)
+            start()
+        }
     }
 
     private fun getSector(touchX: Float, touchY: Float): Int {
@@ -124,12 +140,9 @@ class CircleSectorView : View {
         }
         squareSize = min(width, height)
         val dif = selectedRadius - smallRadrius
+        val iconsRadiusOffset = 0.4
         sectors.forEachIndexed { i, sector ->
-            paint.color = Color.rgb(
-                (255 * (sector.radius - smallRadrius) / dif).toInt(),
-                130,
-                (255 * (selectedRadius - sector.radius) / dif).toInt()
-            )
+            paint.color = sector.color
             val ang =
                 (((2 * Math.PI) / (if (sectors.isNotEmpty()) sectors.size else 1)) / Math.PI * 180).toFloat()
             canvas.drawArc(
@@ -145,27 +158,18 @@ class CircleSectorView : View {
                 paint
             )
             val icon = iconsBitmaps[i]
+            val sectorCenterAngle = ang * (-i - 0.5) + 90
             canvas.drawBitmap(
                 icon,
-                (squareSize / 2 + squareSize * 0.4 * sector.radius * cos((ang * (-i - 0.5) + 90) * Math.PI / 180) - icon.width / 2).toFloat(),
-                (squareSize / 2 - squareSize * 0.4 * sector.radius * sin((ang * (-i - 0.5) + 90) * Math.PI / 180) - icon.height / 2).toFloat(),
+                (squareSize / 2 + squareSize * iconsRadiusOffset * sector.radius * cos(
+                    sectorCenterAngle * Math.PI / 180
+                ) - icon.width / 2).toFloat(),
+                (squareSize / 2 - squareSize * iconsRadiusOffset * sector.radius * sin(
+                    sectorCenterAngle * Math.PI / 180
+                ) - icon.height / 2).toFloat(),
                 paint
             )
         }
-        /*selectedSectorPosition?.also {
-            canvas.drawArc(
-                RectF(
-                    (squareSize * (1 - sectors[it].radius)).toFloat() / 2,
-                    (squareSize * (1 - sectors[it].radius)).toFloat() / 2,
-                    (squareSize * sectors[it].radius + (squareSize * (1 - sectors[it].radius)) / 2).toFloat(),
-                    (squareSize * sectors[it].radius + (squareSize * (1 - sectors[it].radius)) / 2).toFloat()
-                ),
-                ((((2 * Math.PI) / (if (sectors.isNotEmpty()) sectors.size else 1) * it) / Math.PI * 180) - 90).toFloat(),
-                (((2 * Math.PI) / (if (sectors.isNotEmpty()) sectors.size else 1)) / Math.PI * 180).toFloat(),
-                true,
-                paint
-            )
-        }*/
         paint.color = Color.BLACK
         sectors.forEachIndexed { i, sector ->
             val maxRadius =
@@ -182,10 +186,10 @@ class CircleSectorView : View {
         super.onDraw(canvas)
     }
 
-    private class Sector(val name: String, var radius: Double) {
+    private class Sector(val name: String, var radius: Double, var color: Int) {
         var selected = false
         var focused = false
-        var animator: ValueAnimator? = null
+        var animator: AnimatorSet? = null
     }
 
     private fun cancelAnimation() {
