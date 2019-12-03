@@ -10,14 +10,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        circleSectorView.setSectorsNames(listOf("a", "b", "c", "d", "r"))
-        circleSectorView.setIconsDrawable(
+        circleSectorView.setSectorsItems(
             listOf(
-                android.R.drawable.star_big_on,
-                android.R.drawable.star_big_off,
-                android.R.drawable.star_big_on,
-                android.R.drawable.star_big_off,
-                android.R.drawable.star_big_on
+                CircleSectorView.SectorItem("a"),
+                CircleSectorView.SectorItem("a"),
+                CircleSectorView.SectorItem("a"),
+                CircleSectorView.SectorItem("a"),
+                CircleSectorView.SectorItem("a")
             )
         )
         circleSectorView.setOnSectorSelectListener(object :
