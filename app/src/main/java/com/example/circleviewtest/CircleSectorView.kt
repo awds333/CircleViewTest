@@ -2,14 +2,15 @@ package com.example.circleviewtest
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.content.res.TypedArray
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.res.getColorOrThrow
+import java.lang.reflect.Field
 import kotlin.math.*
 
 
@@ -22,6 +23,8 @@ class CircleSectorView : View {
 
     private var smallRadrius = 0.7
     private var selectedRadius = 1.0
+
+    private var startAngle = 0
 
     private val paint = Paint().apply {
         color = Color.BLUE
@@ -67,14 +70,51 @@ class CircleSectorView : View {
 
     constructor(context: Context) : super(context)
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        val a =
-            context.obtainStyledAttributes(attrs, R.styleable.CircleSectorView)
+    private fun getMultiTypedArray(context: Context, key: String): List<TypedArray>? {
+        val array: MutableList<TypedArray> = ArrayList()
         try {
-            val entries =
-                a.getTextArray(R.styleable.CircleSectorView_sectors_names)
-            if (entries != null) {
-                setSectorsItems(entries.toList().map { SectorItem(it.toString()) })
+            val res: Class<R.array> = R.array::class.java
+            var field: Field
+            var counter = 0
+            do {
+                field = res.getField(key + "_" + counter)
+                array.add(context.resources.obtainTypedArray(field.getInt(null)))
+                counter++
+            } while (field != null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            return array
+        }
+    }
+
+    @SuppressLint("ResourceType")
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        val a = context.obtainStyledAttributes(attrs, R.styleable.CircleSectorView)
+        try {
+            a.getFloat(R.styleable.CircleSectorView_small_radius, 1f).also {
+                if (it <= 1)
+                    smallRadrius = it.toDouble()
+            }
+            startAngle = a.getInt(R.styleable.CircleSectorView_start_angle, 0)
+            val sectorsArrayName = a.getString(R.styleable.CircleSectorView_sectors_array_name)
+            sectorsArrayName?.also {
+                val sectorsNonParsed = getMultiTypedArray(context, it)
+                if (sectorsNonParsed?.isNotEmpty() == true) {
+                    setSectorsItems(sectorsNonParsed.toList().map { sector ->
+                        val name = sector.getString(0)
+                        val bitmap: Bitmap = BitmapFactory.decodeResource(
+                            context.resources,
+                            sector.getResourceId(1, 0)
+                        )
+                        val defaultColor = sector.getColorOrThrow(2)
+                        val selectedColor = sector.getColorOrThrow(3)
+
+                        SectorItem(name!!, defaultColor, selectedColor, bitmap)
+                    })
+                } else {
+                    throw java.lang.Exception("Invalid sectors array $sectorsArrayName")
+                }
             }
         } finally {
             a.recycle()
@@ -146,7 +186,6 @@ class CircleSectorView : View {
             return
         }
         squareSize = min(width, height)
-        val dif = selectedRadius - smallRadrius
         val iconsRadiusOffset = 0.4
         sectorsState.forEachIndexed { i, sector ->
             paint.color = sector.color
@@ -184,7 +223,7 @@ class CircleSectorView : View {
                     if (i == 0) sectorsState.last().radius else sectorsState[i - 1].radius
                 )
             val angle =
-                ((2 * Math.PI) / (if (sectorsState.isNotEmpty()) sectorsState.size else 1) * i - Math.PI / 2)
+                (2 * Math.PI) / (if (sectorsState.isNotEmpty()) sectorsState.size else 1) * i - Math.PI / 2
 
             canvas.drawLine(
                 (squareSize / 2).toFloat(), (squareSize / 2).toFloat(),

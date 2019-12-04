@@ -1,12 +1,34 @@
 <resources>
     <string name="app_name">CircleViewTest</string>
 
-    <string-array name="test_sectors_names">
+    <array name="sector_0">
         <item>a</item>
-        <item>b</item>
-        <item>c</item>
-        <item>d</item>
-        <item>e</item>
-        <item>f</item>
-    </string-array>
+        <item>@android:drawable/btn_star_big_on</item>
+        <item>#D81B60</item>
+        <item>#008577</item>
+    </array>
+    <array name="sector_1">
+        <item>a</item>
+        <item>@android:drawable/btn_star_big_on</item>
+        <item>@android:color/background_dark</item>
+        <item>#008577</item>
+    </array>
+    <array name="sector_2">
+        <item>a</item>
+        <item>@android:drawable/btn_star_big_on</item>
+        <item>#D81B60</item>
+        <item>#008577</item>
+    </array>
+    <array name="sector_3">
+        <item>a</item>
+        <item>@android:drawable/btn_star_big_on</item>
+        <item>#D81B60</item>
+        <item>#008577</item>
+    </array>
+    <array name="sector_4">
+        <item>a</item>
+        <item>@android:drawable/btn_star_big_on</item>
+        <item>#D81B60</item>
+        <item>#008577</item>
+    </array>
 </resources>

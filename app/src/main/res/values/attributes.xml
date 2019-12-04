@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleSectorView">
-        <attr name="sectors_names"/>
+        <attr name="sectors_array_name" format="string"/>
         <attr name="small_radius" format="float"/>
+        <attr name="start_angle" format="integer"/>
     </declare-styleable>
 </resources>
