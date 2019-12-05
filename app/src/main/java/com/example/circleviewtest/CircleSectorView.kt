@@ -165,11 +165,14 @@ class CircleSectorView : View {
         val centerPositionX = touchX - (squareSize / 2)
         val centerPositionY = touchY - (squareSize / 2)
         val tg = centerPositionY / centerPositionX
-        var eng = atan(tg.toDouble()) + (Math.PI / 2)
+        var eng = atan(tg.toDouble()) + (Math.PI / 2) - startAngle * Math.PI / 180
         val sectorSize = (2 * Math.PI) / if (sectorsState.isNotEmpty()) sectorsState.size else 1
 
         if (centerPositionX < 0)
             eng += Math.PI
+
+        if (eng < 0)
+            eng += 2 * Math.PI
 
         return (eng / sectorSize).nextUp().toInt()
     }
@@ -196,13 +199,13 @@ class CircleSectorView : View {
                 (squareSize * (1 - sector.radius)).toFloat() / 2,
                 (squareSize * sector.radius + (squareSize * (1 - sector.radius)) / 2).toFloat(),
                 (squareSize * sector.radius + (squareSize * (1 - sector.radius)) / 2).toFloat(),
-                ang * i - 90,
+                ang * i - 90 + startAngle,
                 ang,
                 true,
                 paint
             )
             sectorsState[i].sectorItem.icon?.also {
-                val sectorCenterAngle = ang * (-i - 0.5) + 90
+                val sectorCenterAngle = ang * (-i - 0.5) + 90 - startAngle
                 canvas.drawBitmap(
                     it,
                     (squareSize / 2 + squareSize * iconsRadiusOffset * sector.radius * cos(
@@ -223,7 +226,7 @@ class CircleSectorView : View {
                     if (i == 0) sectorsState.last().radius else sectorsState[i - 1].radius
                 )
             val angle =
-                (2 * Math.PI) / (if (sectorsState.isNotEmpty()) sectorsState.size else 1) * i - Math.PI / 2
+                (2 * Math.PI) / (if (sectorsState.isNotEmpty()) sectorsState.size else 1) * i - Math.PI / 2 + startAngle * Math.PI / 180
 
             canvas.drawLine(
                 (squareSize / 2).toFloat(), (squareSize / 2).toFloat(),

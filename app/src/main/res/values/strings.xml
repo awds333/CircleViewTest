@@ -9,7 +9,7 @@
     </array>
     <array name="sector_1">
         <item>a</item>
-        <item>@android:drawable/btn_star_big_on</item>
+        <item>@android:drawable/btn_star_big_off</item>
         <item>@android:color/background_dark</item>
         <item>#008577</item>
     </array>

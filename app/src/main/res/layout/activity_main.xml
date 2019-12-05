@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:sectors_array_name="sector"
-        app:small_radius="0.6"
-        app:start_angle="20"/>
+        app:small_radius="0.8"
+        app:start_angle="20" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
