@@ -19,6 +19,12 @@ class MainActivity : AppCompatActivity() {
                 CircleSectorView.SectorItem("a")
             )
         )*/
+        button.setOnClickListener {
+            circleSectorView.setSelected(2,false)
+        }
+        button2.setOnClickListener {
+            circleSectorView.setSelected(1, selected = true, animate = true)
+        }
         circleSectorView.setOnSectorSelectListener(object :
             CircleSectorView.OnSectorSelectListener {
             override fun onSectorSelected(name: String) {

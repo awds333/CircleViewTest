@@ -24,6 +24,11 @@ class CircleSectorView : View {
     private var smallRadrius = 0.7
     private var selectedRadius = 1.0
 
+    private var sectorColor: Int = -1
+    private var selectedSectorColor: Int = -1
+
+    private var duration = 400L
+
     private var startAngle = 0
 
     private val paint = Paint().apply {
@@ -97,6 +102,8 @@ class CircleSectorView : View {
                     smallRadrius = it.toDouble()
             }
             startAngle = a.getInt(R.styleable.CircleSectorView_start_angle, 0)
+            sectorColor = a.getColor(R.styleable.CircleSectorView_default_color,-1)
+            selectedSectorColor = a.getColor(R.styleable.CircleSectorView_selected_color,-1)
             val sectorsArrayName = a.getString(R.styleable.CircleSectorView_sectors_array_name)
             sectorsArrayName?.also {
                 val sectorsNonParsed = getMultiTypedArray(context, it)
@@ -107,10 +114,16 @@ class CircleSectorView : View {
                             context.resources,
                             sector.getResourceId(1, 0)
                         )
-                        val defaultColor = sector.getColorOrThrow(2)
-                        val selectedColor = sector.getColorOrThrow(3)
-
-                        SectorItem(name!!, defaultColor, selectedColor, bitmap)
+                        try {
+                            val sColor = sector.getColorOrThrow(2)
+                            val selectedSColor = sector.getColorOrThrow(3)
+                            SectorItem(name!!, sColor, selectedSColor, bitmap)
+                        } catch (e: Exception){
+                            if(sectorColor != -1 && selectedSectorColor != -1)
+                                SectorItem(name!!, sectorColor, selectedSectorColor, bitmap)
+                            else
+                                SectorItem(name!!,icon =  bitmap)
+                        }
                     })
                 } else {
                     throw java.lang.Exception("Invalid sectors array $sectorsArrayName")
@@ -130,12 +143,32 @@ class CircleSectorView : View {
         this.listener = listener
     }
 
+    fun setSelected (position: Int, selected: Boolean, animate: Boolean = false) {
+        sectorsState[position].also {
+            it.selected = selected
+            if(animate) {
+                animate(it)
+            } else{
+                it.animator?.cancel()
+                if(selected){
+                    it.color = it.sectorItem.selectedColor
+                    it.radius = selectedRadius
+                } else{
+                    it.color = it.sectorItem.defaultColor
+                    it.radius = smallRadrius
+                }
+                invalidate()
+            }
+        }
+
+    }
+
     private fun animate(sectorState: SectorState) {
         sectorState.animator?.cancel()
         val targetRadius =
             if (sectorState.selected) selectedRadius.toFloat() else smallRadrius.toFloat()
         val animationDuration =
-            400 * abs(sectorState.radius - targetRadius) / (selectedRadius - smallRadrius)
+            duration * abs(sectorState.radius - targetRadius) / (selectedRadius - smallRadrius)
 
         val colorAnimator = ValueAnimator.ofArgb(
             sectorState.color,

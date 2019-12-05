@@ -4,5 +4,7 @@
         <attr name="sectors_array_name" format="string"/>
         <attr name="small_radius" format="float"/>
         <attr name="start_angle" format="integer"/>
+        <attr name="default_color" format="color"/>
+        <attr name="selected_color" format="color"/>
     </declare-styleable>
 </resources>

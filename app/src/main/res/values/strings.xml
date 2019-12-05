@@ -4,8 +4,6 @@
     <array name="sector_0">
         <item>a</item>
         <item>@android:drawable/btn_star_big_on</item>
-        <item>#D81B60</item>
-        <item>#008577</item>
     </array>
     <array name="sector_1">
         <item>a</item>
@@ -22,8 +20,6 @@
     <array name="sector_3">
         <item>a</item>
         <item>@android:drawable/btn_star_big_on</item>
-        <item>#D81B60</item>
-        <item>#008577</item>
     </array>
     <array name="sector_4">
         <item>a</item>
